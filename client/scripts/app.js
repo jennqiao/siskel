@@ -14,16 +14,53 @@ var Movie = Backbone.Model.extend({
 var Movies = Backbone.Collection.extend({
 
   model: Movie,
-
+  isAscending: true,
+  field: 'title',
   initialize: function() {
 
   },
+  
+  reverseSortBy: function(sortByFunction) {
+    return function(a, b) {
+      var l = sortByFunction(a);
+      var r = sortByFunction(b);
 
-  comparator: 'title',
+      if (l === void 0) {
+        return -1;
+      }
+      if (r === void 0) {
+        return 1;
+      }
+      return l < r ? 1 : l > r ? -1 : 0;
+    };
+  },
+
+  comparator: function(movie) {
+    return movie.get('title'); 
+  },
 
   sortByField: function(field) {
-    this.comparator = field;
-    this.sort('comparator');
+    if (this.field === field) {
+      this.isAscending = !this.isAscending;
+    } else {
+      this.isAscending = true;
+      this.field = field;
+    }
+
+    if (this.isAscending) {
+      this.comparator = function(movie) {
+        return movie.get(this.field);
+      };
+      console.log(this.field);
+
+      console.log('true', this.comparator);
+      this.sort();
+    } else {
+      this.comparator = this.reverseSortBy(this.comparator);
+      console.log('false', this.comparator);
+
+      this.sort();
+    }
   }
 
 });
